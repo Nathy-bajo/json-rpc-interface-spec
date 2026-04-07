@@ -19,14 +19,8 @@ If the height passed to `archive_v1_hashByHeight` is strictly superior to the va
 
 ## Transaction Location Queries
 
-The `archive_unstable_transactionReceipt` function allows efficiently finding where a transaction has been included in the blockchain without requiring full block downloads.
+The `archive_unstable_transactionReceipt` function finds every known block that contains a given transaction, returning the block hash, extrinsic index, chain placement status, and raw event log for each occurrence.
 
-This function addresses the need for:
+This function is fork-aware: since the same transaction bytes can appear in multiple competing forks or even multiple finalized blocks under certain conditions, the return value is always an array. Callers should check the `status` field of each result to determine whether the containing block is finalized, on the best chain, or on a non-best fork.
 
-- **Efficient verification**: Quickly check if/when a transaction was included
-- **Fork-aware lookups**: Find transactions across multiple branches
-- **Stateless operation**: Works over simple HTTP without WebSockets
-
-Unlike higher-level receipt queries, this function focuses solely on locating transactions, leaving interpretation of events, fees, and status to client-side logic or additional RPC calls.
-
-**Note**: This is an unstable function and its API may change. It serves as a foundation for future stable versions (`archive_v2`) and informs the design of similar functionality in `chainHead_v2`.
+This function intentionally does not interpret execution outcome, fees, or other runtime-specific data. Those concerns belong to higher layers that can decode the raw `log` bytes against the relevant runtime metadata.
